@@ -1,0 +1,8 @@
+.git
+.venv
+.vscode
+# 注意：nonebot2需要pyproject.toml作为配置的一部分，所以不能从上下文中排除
+# pyproject.toml
+poetry.lock
+**/*.pyc
+**/__pycache__

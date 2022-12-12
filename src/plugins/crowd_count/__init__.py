@@ -14,8 +14,8 @@ global_config = get_driver().config
 config = Config.parse_obj(global_config)
 
 
-backend_url: str = os.getenv('URL', 'http://localhost:8000')
-bots_url: str = backend_url + '/bots/'
+backend_url: str = os.getenv('BACKEND_URL', 'http://localhost:8000')
+bots_url: str = backend_url + '/bots'
 
 
 def get_urls(event) -> list[str]:
@@ -40,7 +40,7 @@ def push_to_backend(urls: list[str]):
     except requests.exceptions.ConnectionError as e:
         print(e)
         print('------connection error------')
-        return {'message': "can't connect to backend(/bots)"}
+        return {'message': "can't connect to backend"}
     return response
 
 
@@ -52,17 +52,21 @@ async def predict_handle(bot: Bot, event: Event):
     urls: list[str] = get_urls(event)
     response: dict[str, str] | Response = push_to_backend(urls)
 
+    # 对应当前文件43行的 {'message': "can't connect to backend"}
     if isinstance(response, dict):
-        if response['message'] == "can't connect to backend(/bots)":
-            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]无法连接到后端(/bots)'))
+        if response['message'] == "can't connect to backend":
+            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]无法连接到后端'))
     else:
         res = response.json()
-        predict_digits: list[int] = res["predict_digits"]
-        processed_urls: list[str] = res["processed_urls"]
-        image = MessageSegment.image(processed_urls[0])
 
-        if response.status_code == 200 and 'message' not in response.json():
-            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]您方才发送图片的人头预测数值为{predict_digits}\n{image}'))
+        if response.status_code == 200 and 'message' not in res:
+            predict_digits: list[int] = res["predict_digits"]
+            processed_urls: list[str] = res["processed_urls"]
+            image = ''
+            for url in processed_urls:
+                image += MessageSegment.image(url)
+
+            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]检测成功，检测数值为{predict_digits}\n预测图示如下\n{image}'))
         elif response.status_code == 200 and res['message'] == 'the engine download pictures failed':
             await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]引擎下载图片失败'))
         elif response.status_code == 200 and res['message'] == 'the engine predict failed':
@@ -71,3 +75,11 @@ async def predict_handle(bot: Bot, event: Event):
             await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]由于url不存在，图片下载失败'))
         elif response.status_code == 200 and res['message'] == 'the engine failed to upload processed file':
             await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]引擎上传处理后的图片失败'))
+        elif response.status_code == 200 and res['message'] == 'backend upload to oss failed':
+            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]后端上传到oss失败'))
+        elif response.status_code == 200 and res['message'] == 'backend request for url failed when save to local':
+            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]后端下载图片失败'))
+        elif response.status_code == 200 and res['message'] == 'please upload image files(png, jpg, jpeg)':
+            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]请上传图片(jpg，jpeg，png)'))
+        else:
+            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]不明原因失败'))
