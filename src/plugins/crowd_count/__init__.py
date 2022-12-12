@@ -70,7 +70,7 @@ async def predict_handle(bot: Bot, event: Event):
         elif response.status_code == 200 and res['message'] == 'the engine download pictures failed':
             await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]引擎下载图片失败'))
         elif response.status_code == 200 and res['message'] == 'the engine predict failed':
-            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]引擎预测失败'))
+            await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]引擎预测失败，请选择其他图片进行预测'))
         elif response.status_code == 200 and res['message'] == 'the engine download pictures failed because the url is wrong':
             await predict.finish(Message(f'[CQ:at,qq={event.get_user_id()}]由于url不存在，图片下载失败'))
         elif response.status_code == 200 and res['message'] == 'the engine failed to upload processed file':
