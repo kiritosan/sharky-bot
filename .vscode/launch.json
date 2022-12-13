@@ -5,11 +5,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Current File",
+      "name": "(bot) Python: nonebot2",
       "type": "python",
       "request": "launch",
-      "program": "bot.py",
-      "console": "integratedTerminal"
-    }
+      "python": "/home/willem/sharky/bot/.venv/bin/python",
+      "module": "nb_cli",
+      "args": ["run"],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "cwd": "${workspaceFolder}"
+    },
   ]
 }
