@@ -1,47 +1,14 @@
-import requests
 from nonebot.adapters.onebot.v11.message import Message, MessageSegment
 from nonebot.adapters.onebot.v11 import Bot, Event
 from nonebot.plugin import on_keyword
-from email import header
-import os
-from sqlite3 import paramstyle
 from nonebot import get_driver
 from requests import Response
+from .utils import get_urls, push_to_backend
 
 from .config import Config
 
 global_config = get_driver().config
 config = Config.parse_obj(global_config)
-
-
-backend_url: str = os.getenv('BACKEND_URL', 'http://localhost:8000')
-bots_url: str = backend_url + '/bots'
-
-
-def get_urls(event) -> list[str]:
-    urls = []
-    messages = event.get_message()
-    for message in messages:
-        if message.type == 'image':
-            urls.append(message.data['url'])
-    return urls
-
-
-def push_to_backend(urls: list[str]):
-    headers: dict[str, str] = {
-        'accept': 'application/json',
-    }
-    params: dict[str, list[str]] = {
-        'urls': urls
-    }
-    try:
-        response: Response = requests.get(
-            bots_url, params=params, headers=headers)
-    except requests.exceptions.ConnectionError as e:
-        print(e)
-        print('------connection error------')
-        return {'message': "can't connect to backend"}
-    return response
 
 
 predict = on_keyword({'predict', '预测', '检测'}, priority=50)
@@ -59,6 +26,7 @@ async def predict_handle(bot: Bot, event: Event):
     else:
         res = response.json()
 
+        # core code
         if response.status_code == 200 and 'message' not in res:
             predict_digits: list[int] = res["predict_digits"]
             processed_urls: list[str] = res["processed_urls"]

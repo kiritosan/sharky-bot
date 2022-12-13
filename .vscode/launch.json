@@ -12,7 +12,6 @@
       "module": "nb_cli",
       "args": ["run"],
       "console": "integratedTerminal",
-      "justMyCode": true,
       "cwd": "${workspaceFolder}"
     },
   ]
