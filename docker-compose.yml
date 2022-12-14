@@ -19,5 +19,6 @@ services:
     volumes:
       - ./accounts:/app/accounts
       - ./.env.prod:/app/.env.prod
+      - ./data:/app/data
     expose:
       - 53326
