@@ -7,3 +7,6 @@ poetry.lock
 **/*.pyc
 **/__pycache__
 __pycache__
+.env
+.env.dev
+.env.prod

@@ -10,7 +10,7 @@ services:
     dns:
       - 114.114.114.114
     env_file:
-      - ".env.prod" # fastapi 使用的环境变量文件
+      - ".env.prod" # fastapi 使用的环境变量文件 如果docker compose时使用现成的image，则需要手动创建.env.prod文件到当前目录
     environment:
       - ENVIRONMENT=prod # 配置 nonebot 运行环境，此项会被 .env 文件覆盖
       - APP_MODULE=bot:app # 配置 asgi 入口
@@ -18,5 +18,6 @@ services:
       - BACKEND_URL=http://localhost:8000
     volumes:
       - ./accounts:/app/accounts
+      - ./.env.prod:/app/.env.prod
     expose:
       - 53326
